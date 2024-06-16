@@ -1,6 +1,6 @@
 use super::components::*;
 use bevy::prelude::*;
-use leafwing_input_manager::{prelude::*};
+use leafwing_input_manager::prelude::*;
 use std::f32::consts::*;
 
 const ANGLE_EPSILON: f32 = 0.001953125;
@@ -9,12 +9,13 @@ pub fn fps_controller_input(
     action_state_query: Query<&ActionState<FpsActions>>,
     mut query: Query<(&FpsController, &mut FpsControllerInput)>,
 ) {
-    let action_state = action_state_query.single();
-    for (controller, mut input) in query.iter_mut() {
-        if !controller.enable_input {
-            continue;
-        }
+    let (controller, mut input) = query.single_mut();
 
+    if !controller.enable_input {
+        return;
+    }
+
+    for action_state in action_state_query.iter() {
         if let Some(mouse_movement) = action_state.axis_pair(&FpsActions::MousePosition) {
             let mouse_delta = mouse_movement.xy() * controller.sensitivity;
 
@@ -26,6 +27,29 @@ pub fn fps_controller_input(
             }
         }
 
-        // Other input handling can go here, for movement, etc.
+        input.movement = Vec3::new(
+            get_axis(&action_state, FpsActions::Right, FpsActions::Left),
+            get_axis(&action_state, FpsActions::Jump, FpsActions::Sprint),
+            get_axis(&action_state, FpsActions::Forward, FpsActions::Backward),
+        );
+
+        input.fly = action_state.just_pressed(&FpsActions::Crouch);
+
+        // input.sprint = action_state.pressed(&FpsActions::Sprint);
+        // input.jump = action_state.just_pressed(&FpsActions::Jump);
+        // // input.fly =
+        // input.crouch = action_state.just_pressed(&FpsActions::Crouch);
     }
+}
+
+fn get_pressed(key_input: &ActionState<FpsActions>, key: FpsActions) -> f32 {
+    if key_input.pressed(&key) {
+        1.0
+    } else {
+        0.0
+    }
+}
+
+fn get_axis(key_input: &ActionState<FpsActions>, key_pos: FpsActions, key_neg: FpsActions) -> f32 {
+    get_pressed(key_input, key_pos) - get_pressed(key_input, key_neg)
 }

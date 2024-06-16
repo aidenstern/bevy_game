@@ -32,7 +32,7 @@ pub fn fps_controller_move(
         mut collider,
         mut transform,
         mut velocity,
-        shape_caster,
+        _shape_caster,
         shape_hits,
     ) in query.iter_mut()
     {
@@ -118,8 +118,11 @@ fn handle_ground_mode(
         };
         wish_speed = f32::min(wish_speed, max_speed);
 
+        println!("Wish speed: {}", wish_speed);
+
         // if there was no hits
         if shape_hits.as_slice().is_empty() {
+            println!("No hits");
             controller.ground_tick = 0;
             wish_speed = f32::min(wish_speed, controller.air_speed_cap);
 
@@ -156,9 +159,9 @@ fn handle_ground_mode(
                     velocity.x *= new_speed;
                     velocity.z *= new_speed;
                 } else {
-                    velocity.x = 0.0;
-                    velocity.y = 0.0;
-                    velocity.z = 0.0;
+                    // velocity.x = 0.0;
+                    // velocity.y = 0.0;
+                    // velocity.z = 0.0;
                 }
                 if controller.ground_tick == 1 {
                     velocity.y = -shape_hit_data.time_of_impact;
@@ -224,6 +227,8 @@ fn handle_ground_mode(
         //         transform.translation += cast_offset;
         //     }
         // }
+
+        println!("Linear velocity: {:?}", velocity.xyz());
 
         // Prevent falling off ledges
         // if controller.ground_tick >= 1 && input.crouch {

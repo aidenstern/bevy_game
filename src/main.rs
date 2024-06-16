@@ -7,7 +7,6 @@ mod util;
 
 use std::f32::consts::TAU;
 
-
 use bevy::{prelude::*, render::camera::Exposure, window::PrimaryWindow};
 use bevy_xpbd_3d::prelude::*;
 use components::*;
@@ -16,7 +15,6 @@ use plugin::FpsControllerPlugin;
 use util::*;
 
 const SPAWN_POINT: Vec3 = Vec3::new(0.0, 50.0, 0.0);
-
 
 fn main() {
     App::new()
@@ -61,9 +59,17 @@ fn setup(
         ..default()
     });
 
-    let input_map = InputMap::new([
-        (FpsActions::MousePosition, DualAxis::mouse_motion())
-    ]);
+    let input_map = InputMap::new([(FpsActions::MousePosition, DualAxis::mouse_motion())])
+        .insert_multiple([
+            (FpsActions::Forward, KeyCode::KeyW),
+            (FpsActions::Backward, KeyCode::KeyS),
+            (FpsActions::Left, KeyCode::KeyA),
+            (FpsActions::Right, KeyCode::KeyD),
+            (FpsActions::Sprint, KeyCode::ShiftLeft),
+            (FpsActions::Crouch, KeyCode::ControlLeft),
+            (FpsActions::Jump, KeyCode::Space),
+        ])
+        .build();
 
     // Note that we have two entities for the player
     // One is a "logical" player that handles the physics computation and collision
@@ -112,11 +118,14 @@ fn setup(
     // Better than a ray cast as it handles when you are near the edge of a surface
     let filter = SpatialQueryFilter::default().with_excluded_entities([logical_entity]);
     let cast_capsule = Collider::capsule(1.0, 0.45);
-    let shape_caster = ShapeCaster::new(cast_capsule, SPAWN_POINT, Quat::default(), Direction3d::NEG_Y).with_query_filter(filter);
-    commands
-        .entity(logical_entity)
-        .insert(shape_caster);
-
+    let shape_caster = ShapeCaster::new(
+        cast_capsule,
+        SPAWN_POINT,
+        Quat::default(),
+        Direction3d::NEG_Y,
+    )
+    .with_query_filter(filter);
+    commands.entity(logical_entity).insert(shape_caster);
 
     commands
         .entity(other_window.single())
@@ -146,18 +155,17 @@ fn setup(
                 color: Color::BLACK,
             },
         )
-            .with_style(Style {
-                position_type: PositionType::Absolute,
-                top: Val::Px(5.0),
-                left: Val::Px(5.0),
-                ..default()
-            }),
+        .with_style(Style {
+            position_type: PositionType::Absolute,
+            top: Val::Px(5.0),
+            left: Val::Px(5.0),
+            ..default()
+        }),
     );
 }
 
-
 fn respawn(mut query: Query<(&mut Transform, &mut LinearVelocity)>) {
-    println!("Respawning");
+    // println!("Respawning");
     for (mut transform, mut velocity) in &mut query {
         if transform.translation.y > -50.0 {
             continue;

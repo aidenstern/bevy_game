@@ -1,7 +1,6 @@
 use bevy::{gltf::Gltf, prelude::*};
 use leafwing_input_manager::prelude::*;
 
-
 #[derive(Resource)]
 pub struct MainScene {
     pub handle: Handle<Gltf>,
@@ -11,6 +10,13 @@ pub struct MainScene {
 #[derive(Actionlike, Clone, Debug, Copy, PartialEq, Eq, Hash, Reflect)]
 pub enum FpsActions {
     MousePosition,
+    Forward,
+    Backward,
+    Left,
+    Right,
+    Jump,
+    Sprint,
+    Crouch,
 }
 
 #[derive(PartialEq)]
@@ -77,16 +83,6 @@ pub struct FpsController {
     pub sensitivity: f32,
     pub enable_input: bool,
     pub step_offset: f32,
-    pub key_forward: KeyCode,
-    pub key_back: KeyCode,
-    pub key_left: KeyCode,
-    pub key_right: KeyCode,
-    pub key_up: KeyCode,
-    pub key_down: KeyCode,
-    pub key_sprint: KeyCode,
-    pub key_jump: KeyCode,
-    pub key_fly: KeyCode,
-    pub key_crouch: KeyCode,
 }
 
 impl Default for FpsController {
@@ -122,16 +118,6 @@ impl Default for FpsController {
             jump_speed: 8.5,
             step_offset: 0.0,
             enable_input: true,
-            key_forward: KeyCode::KeyW,
-            key_back: KeyCode::KeyS,
-            key_left: KeyCode::KeyA,
-            key_right: KeyCode::KeyD,
-            key_up: KeyCode::KeyQ,
-            key_down: KeyCode::KeyE,
-            key_sprint: KeyCode::ShiftLeft,
-            key_jump: KeyCode::Space,
-            key_fly: KeyCode::KeyF,
-            key_crouch: KeyCode::ControlLeft,
             sensitivity: 0.001,
         }
     }
