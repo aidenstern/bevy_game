@@ -71,11 +71,7 @@ fn handle_noclip_mode(
     velocity: &mut LinearVelocity,
 ) {
     if input.movement == Vec3::ZERO {
-        let friction = controller.fly_friction.clamp(0.0, 1.0);
-        *velocity = LinearVelocity(velocity.xyz() * 1.0 - friction);
-        if velocity.length_squared() < f32::EPSILON {
-            *velocity = LinearVelocity::ZERO;
-        }
+        *velocity = LinearVelocity::ZERO;
     } else {
         let fly_speed = if input.sprint {
             controller.fast_fly_speed
@@ -159,9 +155,9 @@ fn handle_ground_mode(
                     velocity.x *= new_speed;
                     velocity.z *= new_speed;
                 } else {
-                    // velocity.x = 0.0;
-                    // velocity.y = 0.0;
-                    // velocity.z = 0.0;
+                    velocity.x = 0.0;
+                    velocity.y = 0.0;
+                    velocity.z = 0.0;
                 }
                 if controller.ground_tick == 1 {
                     velocity.y = -shape_hit_data.time_of_impact;

@@ -7,7 +7,7 @@ mod util;
 
 use std::f32::consts::TAU;
 
-use bevy::{prelude::*, render::camera::Exposure, window::PrimaryWindow};
+use bevy::{core::Zeroable, prelude::*, render::camera::Exposure, window::PrimaryWindow};
 use bevy_xpbd_3d::prelude::*;
 use components::*;
 use leafwing_input_manager::prelude::*;
@@ -121,18 +121,11 @@ fn setup(
     let shape_caster = ShapeCaster::new(
         cast_capsule,
         SPAWN_POINT,
-        Quat::default(),
+        Quat::zeroed(),
         Direction3d::NEG_Y,
     )
     .with_query_filter(filter);
     commands.entity(logical_entity).insert(shape_caster);
-
-    commands
-        .entity(other_window.single())
-        .insert(ActionStateDriver {
-            action: FpsActions::MousePosition,
-            targets: logical_entity.into(),
-        });
 
     commands.spawn((
         Camera3dBundle {
