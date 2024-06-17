@@ -17,6 +17,7 @@ pub enum FpsActions {
     Jump,
     Sprint,
     Crouch,
+    Fly,
 }
 
 #[derive(PartialEq)]

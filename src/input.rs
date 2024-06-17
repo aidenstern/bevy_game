@@ -33,11 +33,10 @@ pub fn fps_controller_input(
             get_axis(&action_state, FpsActions::Forward, FpsActions::Backward),
         );
 
-        input.fly = action_state.just_pressed(&FpsActions::Crouch);
+        input.fly = action_state.just_pressed(&FpsActions::Fly);
 
         // input.sprint = action_state.pressed(&FpsActions::Sprint);
         // input.jump = action_state.just_pressed(&FpsActions::Jump);
-        // // input.fly =
         // input.crouch = action_state.just_pressed(&FpsActions::Crouch);
     }
 }

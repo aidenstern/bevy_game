@@ -42,7 +42,7 @@ fn setup(
     assets: Res<AssetServer>,
 ) {
     let mut window = window.single_mut();
-    window.title = String::from("Minimal FPS Controller Example");
+    window.title = String::from("Game");
 
     commands.insert_resource(MainScene {
         handle: assets.load("playground.glb"),
@@ -59,6 +59,8 @@ fn setup(
         ..default()
     });
 
+    // Rust analyzer complains if I put the mouse motion with the key bindings in one array in the constructor
+    // So I'm doing it in two steps
     let input_map = InputMap::new([(FpsActions::MousePosition, DualAxis::mouse_motion())])
         .insert_multiple([
             (FpsActions::Forward, KeyCode::KeyW),
@@ -68,6 +70,7 @@ fn setup(
             (FpsActions::Sprint, KeyCode::ShiftLeft),
             (FpsActions::Crouch, KeyCode::ControlLeft),
             (FpsActions::Jump, KeyCode::Space),
+            (FpsActions::Fly, KeyCode::AltLeft),
         ])
         .build();
 

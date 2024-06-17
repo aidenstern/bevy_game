@@ -192,16 +192,16 @@ fn handle_ground_mode(
 
         /* Crouching */
 
-        let crouch_height = controller.crouch_height;
-        let upright_height = controller.upright_height;
+        // let crouch_height = controller.crouch_height;
+        // let upright_height = controller.upright_height;
 
-        let crouch_speed = if input.crouch {
-            -controller.crouch_speed
-        } else {
-            controller.uncrouch_speed
-        };
-        controller.height += dt * crouch_speed;
-        controller.height = controller.height.clamp(crouch_height, upright_height);
+        // let crouch_speed = if input.crouch {
+        //     -controller.crouch_speed
+        // } else {
+        //     controller.uncrouch_speed
+        // };
+        // controller.height += dt * crouch_speed;
+        // controller.height = controller.height.clamp(crouch_height, upright_height);
 
         // if let Some(mut capsule) = collider.into() {
         //     capsule.set_segment(Vec3::Y * 0.5, Vec3::Y * controller.height);
@@ -225,6 +225,7 @@ fn handle_ground_mode(
         // }
 
         println!("Linear velocity: {:?}", velocity.xyz());
+        println!("Ground tick: {}", controller.ground_tick);
 
         // Prevent falling off ledges
         // if controller.ground_tick >= 1 && input.crouch {
