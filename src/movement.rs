@@ -1,6 +1,7 @@
 use super::components::*;
 use super::util::acceleration;
 use bevy::prelude::*;
+use bevy_xpbd_3d::parry::shape::SharedShape;
 use bevy_xpbd_3d::prelude::*;
 
 pub fn fps_controller_look(mut query: Query<(&mut FpsController, &FpsControllerInput)>) {
@@ -114,11 +115,7 @@ fn handle_ground_mode(
         };
         wish_speed = f32::min(wish_speed, max_speed);
 
-        println!("Wish speed: {}", wish_speed);
-
-        // if there was no hits
         if shape_hits.as_slice().is_empty() {
-            println!("No hits");
             controller.ground_tick = 0;
             wish_speed = f32::min(wish_speed, controller.air_speed_cap);
 
@@ -126,28 +123,29 @@ fn handle_ground_mode(
                 wish_direction,
                 wish_speed,
                 controller.air_acceleration,
-                velocity.xyz(),
+                velocity.0,
                 dt,
             );
+            // println!("Air acceleration: {:?}", add);
             add.y = -controller.gravity * dt;
-            *velocity = LinearVelocity(velocity.xyz() + add);
+            velocity.0 += add;
 
-            let air_speed = velocity.xz().length();
+            let air_speed = velocity.0.xz().length();
             if air_speed > controller.max_air_speed {
                 let ratio = controller.max_air_speed / air_speed;
-                velocity.x *= ratio;
-                velocity.z *= ratio;
+                velocity.0.x *= ratio;
+                velocity.0.z *= ratio;
             }
+            // println!("Air velocity: {:?}", velocity.0);
         }
 
-        // process shape hits
         for shape_hit_data in shape_hits.as_slice().iter() {
+            println!("Hit: {:?}", shape_hit_data);
             let has_traction =
                 Vec3::dot(shape_hit_data.normal1, Vec3::Y) > controller.traction_normal_cutoff;
 
-            // Only apply friction after at least one tick, allows b-hopping without losing speed
             if controller.ground_tick >= 1 && has_traction {
-                let lateral_speed = velocity.xz().length();
+                let lateral_speed = velocity.0.xz().length();
                 if lateral_speed > controller.friction_speed_cutoff {
                     let control = f32::max(lateral_speed, controller.stop_speed);
                     let drop = control * controller.friction * dt;
@@ -155,43 +153,42 @@ fn handle_ground_mode(
                     velocity.x *= new_speed;
                     velocity.z *= new_speed;
                 } else {
-                    velocity.x = 0.0;
-                    velocity.y = 0.0;
-                    velocity.z = 0.0;
+                    *velocity = LinearVelocity::ZERO;
                 }
                 if controller.ground_tick == 1 {
                     velocity.y = -shape_hit_data.time_of_impact;
                 }
+                // println!("Ground velocity: {:?}", velocity.0);
             }
 
             let mut add = acceleration(
                 wish_direction,
                 wish_speed,
                 controller.acceleration,
-                velocity.xyz(),
+                velocity.0,
                 dt,
             );
+            // println!("Acceleration: {:?}", add);
             if !has_traction {
                 add.y -= controller.gravity * dt;
             }
-            *velocity = LinearVelocity(velocity.xyz() + add);
+            velocity.0 += add;
 
             if has_traction {
+                let linvel = velocity.0;
                 *velocity = LinearVelocity(
-                    Vec3::dot(**velocity, shape_hit_data.normal1) * shape_hit_data.normal1,
+                    linvel - Vec3::dot(linvel, shape_hit_data.normal1) * shape_hit_data.normal1,
                 );
 
                 if input.jump {
-                    velocity.y = controller.jump_speed;
+                    velocity.0.y = controller.jump_speed;
                 }
             }
 
-            // Increment ground tick but cap at max value
             controller.ground_tick = controller.ground_tick.saturating_add(1);
         }
 
-        /* Crouching */
-
+        // /* Crouching */
         // let crouch_height = controller.crouch_height;
         // let upright_height = controller.upright_height;
 
@@ -203,8 +200,8 @@ fn handle_ground_mode(
         // controller.height += dt * crouch_speed;
         // controller.height = controller.height.clamp(crouch_height, upright_height);
 
-        // if let Some(mut capsule) = collider.into() {
-        //     capsule.set_segment(Vec3::Y * 0.5, Vec3::Y * controller.height);
+        // if let Some(capsule) = collider.into() {
+        //     capsule.set_shape(Collider::capsule(0.5, controller.height).shape().clone());
         // }
 
         // Step offset
@@ -224,8 +221,8 @@ fn handle_ground_mode(
         //     }
         // }
 
-        println!("Linear velocity: {:?}", velocity.xyz());
-        println!("Ground tick: {}", controller.ground_tick);
+        // println!("Linear velocity: {:?}", velocity.xyz());
+        // println!("Ground tick: {}", controller.ground_tick);
 
         // Prevent falling off ledges
         // if controller.ground_tick >= 1 && input.crouch {

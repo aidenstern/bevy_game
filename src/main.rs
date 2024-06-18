@@ -14,7 +14,7 @@ use leafwing_input_manager::prelude::*;
 use plugin::FpsControllerPlugin;
 use util::*;
 
-const SPAWN_POINT: Vec3 = Vec3::new(0.0, 50.0, 0.0);
+const SPAWN_POINT: Vec3 = Vec3::new(0.0, 5.0, 0.0);
 
 fn main() {
     App::new()
@@ -127,7 +127,8 @@ fn setup(
         Quat::zeroed(),
         Direction3d::NEG_Y,
     )
-    .with_query_filter(filter);
+    .with_query_filter(filter)
+    .with_max_time_of_impact(6.0);
     commands.entity(logical_entity).insert(shape_caster);
 
     commands.spawn((
