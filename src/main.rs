@@ -8,7 +8,10 @@ mod util;
 use std::f32::consts::TAU;
 
 use bevy::{core::Zeroable, prelude::*, render::camera::Exposure, window::PrimaryWindow};
-use bevy_xpbd_3d::prelude::*;
+use bevy_xpbd_3d::{
+    math::{Quaternion, Vector},
+    prelude::*,
+};
 use components::*;
 use leafwing_input_manager::prelude::*;
 use plugin::FpsControllerPlugin;
@@ -30,17 +33,19 @@ fn main() {
         .add_systems(Startup, setup)
         .add_systems(
             Update,
-            (manage_cursor, scene_colliders, display_text, respawn),
+            (
+                manage_cursor,
+                scene_colliders,
+                display_text,
+                respawn,
+                update_grounded,
+                check_grounded,
+            ),
         )
         .run();
 }
 
-fn setup(
-    mut commands: Commands,
-    mut window: Query<&mut Window>,
-    other_window: Query<Entity, With<PrimaryWindow>>,
-    assets: Res<AssetServer>,
-) {
+fn setup(mut commands: Commands, mut window: Query<&mut Window>, assets: Res<AssetServer>) {
     let mut window = window.single_mut();
     window.title = String::from("Game");
 
@@ -74,6 +79,7 @@ fn setup(
         ])
         .build();
 
+    let logical_entity_collider = Collider::capsule(1.0, 0.5);
     // Note that we have two entities for the player
     // One is a "logical" player that handles the physics computation and collision
     // The other is a "render" player that is what is displayed to the user
@@ -81,7 +87,7 @@ fn setup(
     // where often time these two ideas are not exactly synced up
     let logical_entity = commands
         .spawn((
-            Collider::capsule(1.0, 0.5),
+            logical_entity_collider.clone(),
             Friction {
                 dynamic_coefficient: 0.0,
                 static_coefficient: 0.0,
@@ -120,11 +126,12 @@ fn setup(
     // Capsule cast downwards to find ground
     // Better than a ray cast as it handles when you are near the edge of a surface
     let filter = SpatialQueryFilter::default().with_excluded_entities([logical_entity]);
-    let cast_capsule = Collider::capsule(1.0, 0.45);
+    let mut cast_capsule = logical_entity_collider.clone();
+    cast_capsule.set_scale(Vec3::ONE * 0.99, 10);
     let shape_caster = ShapeCaster::new(
         cast_capsule,
         SPAWN_POINT,
-        Quat::zeroed(),
+        Quaternion::default(),
         Direction3d::NEG_Y,
     )
     .with_query_filter(filter)
@@ -170,5 +177,31 @@ fn respawn(mut query: Query<(&mut Transform, &mut LinearVelocity)>) {
 
         *velocity = LinearVelocity::ZERO;
         transform.translation = SPAWN_POINT;
+    }
+}
+
+/// Updates the [`Grounded`] status for character controllers.
+fn update_grounded(
+    mut commands: Commands,
+    mut query: Query<(Entity, &ShapeHits, &Rotation), With<FpsController>>,
+) {
+    for (entity, hits, rotation) in &mut query {
+        // The character is grounded if the shape caster has a hit with a normal
+        // that isn't too steep.
+        let is_grounded = hits
+            .iter()
+            .any(|hit| rotation.rotate(-hit.normal2).angle_between(Vector::Y).abs() <= 0.5);
+
+        if is_grounded {
+            commands.entity(entity).insert(Grounded);
+        } else {
+            commands.entity(entity).remove::<Grounded>();
+        }
+    }
+}
+
+fn check_grounded(mut query: Query<&LinearVelocity, With<Grounded>>) {
+    for velocity in &mut query {
+        println!("Grounded {:?}", velocity);
     }
 }

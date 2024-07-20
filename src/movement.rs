@@ -1,6 +1,7 @@
 use super::components::*;
 use super::util::acceleration;
 use bevy::prelude::*;
+use bevy_xpbd_3d::math::Vector;
 use bevy_xpbd_3d::parry::shape::SharedShape;
 use bevy_xpbd_3d::prelude::*;
 
@@ -22,6 +23,7 @@ pub fn fps_controller_move(
         &mut LinearVelocity,
         &ShapeCaster,
         &ShapeHits,
+        Option<&Grounded>,
     )>,
 ) {
     let dt = time.delta_seconds();
@@ -35,6 +37,7 @@ pub fn fps_controller_move(
         mut velocity,
         _shape_caster,
         shape_hits,
+        grounded,
     ) in query.iter_mut()
     {
         if input.fly {
@@ -61,6 +64,7 @@ pub fn fps_controller_move(
                 &mut transform,
                 &mut velocity,
                 shape_hits,
+                grounded.is_some(),
             ),
         }
     }
@@ -95,6 +99,7 @@ fn handle_ground_mode(
     transform: &mut Transform,
     velocity: &mut LinearVelocity,
     shape_hits: &ShapeHits,
+    grounded: bool,
 ) {
     if let Some(capsule) = collider.shape_scaled().as_capsule() {
         let speeds = Vec3::new(controller.side_speed, 0.0, controller.forward_speed);
@@ -115,7 +120,7 @@ fn handle_ground_mode(
         };
         wish_speed = f32::min(wish_speed, max_speed);
 
-        if shape_hits.as_slice().is_empty() {
+        if !grounded {
             controller.ground_tick = 0;
             wish_speed = f32::min(wish_speed, controller.air_speed_cap);
 

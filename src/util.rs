@@ -1,19 +1,16 @@
-use bevy::{gltf::{Gltf, GltfMesh, GltfNode}, prelude::*, window::CursorGrabMode};
-use bevy_xpbd_3d::{components::{LinearVelocity, RigidBody}, prelude::Collider};
+use bevy::{
+    gltf::{Gltf, GltfMesh, GltfNode},
+    prelude::*,
+    window::CursorGrabMode,
+};
+use bevy_xpbd_3d::{
+    components::{LinearVelocity, RigidBody},
+    prelude::Collider,
+};
 
-use crate::FpsController;
+use crate::{FpsController, LogicalPlayer};
 
 use super::components::MainScene;
-
-
-// pub fn toi_details_unwrap(ground_cast: Option<(Entity, Toi)>) -> Option<(Toi, ToiDetails)> {
-//     if let Some((_, toi)) = ground_cast {
-//         if let Some(details) = toi.details {
-//             return Some((toi, details));
-//         }
-//     }
-//     None
-// }
 
 // pub fn overhang_component(
 //     entity: Entity,
@@ -55,7 +52,6 @@ use super::components::MainScene;
 //     None
 // }
 
-
 pub fn acceleration(
     wish_direction: Vec3,
     wish_speed: f32,
@@ -74,7 +70,7 @@ pub fn acceleration(
 }
 
 pub fn display_text(
-    mut controller_query: Query<(&Transform, &LinearVelocity)>,
+    mut controller_query: Query<(&Transform, &LinearVelocity), With<LogicalPlayer>>,
     mut text_query: Query<&mut Text>,
 ) {
     for (transform, velocity) in &mut controller_query {

@@ -1,6 +1,11 @@
 use bevy::{gltf::Gltf, prelude::*};
 use leafwing_input_manager::prelude::*;
 
+/// A marker component indicating that an entity is on the ground.
+#[derive(Component)]
+#[component(storage = "SparseSet")]
+pub struct Grounded;
+
 #[derive(Resource)]
 pub struct MainScene {
     pub handle: Handle<Gltf>,

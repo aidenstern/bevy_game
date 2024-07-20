@@ -7,9 +7,7 @@ use super::render::*;
 use bevy::{input::InputSystem, prelude::*};
 use leafwing_input_manager::{plugin::InputManagerSystem, systems::run_if_enabled};
 
-
 pub struct FpsControllerPlugin;
-
 
 impl Plugin for FpsControllerPlugin {
     fn build(&self, app: &mut App) {
