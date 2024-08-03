@@ -7,11 +7,11 @@ mod util;
 
 use std::f32::consts::TAU;
 
-use bevy::{core::Zeroable, prelude::*, render::camera::Exposure, window::PrimaryWindow};
-use bevy_xpbd_3d::{
+use avian3d::{
     math::{Quaternion, Vector},
     prelude::*,
 };
+use bevy::{prelude::*, render::camera::Exposure};
 use components::*;
 use leafwing_input_manager::prelude::*;
 use plugin::FpsControllerPlugin;
@@ -25,7 +25,7 @@ fn main() {
             color: Color::WHITE,
             brightness: 10000.0,
         })
-        .insert_resource(ClearColor(Color::hex("D4F5F5").unwrap()))
+        .insert_resource(ClearColor(Color::Srgba(Srgba::hex("D4F5F5").unwrap())))
         .add_plugins(PhysicsPlugins::default())
         .add_plugins(DefaultPlugins)
         .add_plugins(InputManagerPlugin::<FpsActions>::default())
@@ -80,11 +80,10 @@ fn setup(mut commands: Commands, mut window: Query<&mut Window>, assets: Res<Ass
         .build();
 
     let logical_entity_collider = Collider::capsule(1.0, 0.5);
+
     // Note that we have two entities for the player
     // One is a "logical" player that handles the physics computation and collision
     // The other is a "render" player that is what is displayed to the user
-    // This distinction is useful for later on if you want to add multiplayer,
-    // where often time these two ideas are not exactly synced up
     let logical_entity = commands
         .spawn((
             logical_entity_collider.clone(),
@@ -132,10 +131,11 @@ fn setup(mut commands: Commands, mut window: Query<&mut Window>, assets: Res<Ass
         cast_capsule,
         SPAWN_POINT,
         Quaternion::default(),
-        Direction3d::NEG_Y,
+        Dir3::NEG_Y,
     )
     .with_query_filter(filter)
     .with_max_time_of_impact(6.0);
+
     commands.entity(logical_entity).insert(shape_caster);
 
     commands.spawn((
@@ -190,7 +190,7 @@ fn update_grounded(
         // that isn't too steep.
         let is_grounded = hits
             .iter()
-            .any(|hit| rotation.rotate(-hit.normal2).angle_between(Vector::Y).abs() <= 0.5);
+            .any(|hit| (rotation * -hit.normal2).angle_between(Vector::Y).abs() <= 0.5);
 
         if is_grounded {
             commands.entity(entity).insert(Grounded);

@@ -1,9 +1,7 @@
 use super::components::*;
 use super::util::acceleration;
+use avian3d::{math::*, prelude::*};
 use bevy::prelude::*;
-use bevy_xpbd_3d::math::Vector;
-use bevy_xpbd_3d::parry::shape::SharedShape;
-use bevy_xpbd_3d::prelude::*;
 
 pub fn fps_controller_look(mut query: Query<(&mut FpsController, &FpsControllerInput)>) {
     for (mut controller, input) in query.iter_mut() {

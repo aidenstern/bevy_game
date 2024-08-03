@@ -1,14 +1,10 @@
+use crate::{FpsController, LogicalPlayer};
+use avian3d::{math::*, prelude::*};
 use bevy::{
     gltf::{Gltf, GltfMesh, GltfNode},
     prelude::*,
     window::CursorGrabMode,
 };
-use bevy_xpbd_3d::{
-    components::{LinearVelocity, RigidBody},
-    prelude::Collider,
-};
-
-use crate::{FpsController, LogicalPlayer};
 
 use super::components::MainScene;
 

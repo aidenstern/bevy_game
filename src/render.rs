@@ -1,13 +1,13 @@
-use bevy::prelude::*;
-use bevy_xpbd_3d::plugins::collision::Collider;
 use super::components::*;
+use avian3d::collision::Collider;
+use bevy::prelude::*;
 
 pub fn fps_controller_render(
     mut render_query: Query<(&mut Transform, &RenderPlayer), With<RenderPlayer>>,
     logical_query: Query<
         (&Transform, &Collider, &FpsController, &CameraConfig),
         (With<LogicalPlayer>, Without<RenderPlayer>),
-    >, 
+    >,
 ) {
     for (mut render_transform, render_player) in render_query.iter_mut() {
         if let Ok((logical_transform, collider, controller, camera_config)) =
