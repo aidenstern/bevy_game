@@ -3,6 +3,26 @@ use super::util::acceleration;
 use avian3d::{math::*, prelude::*};
 use bevy::prelude::*;
 
+/// Updates the [`Grounded`] status for character controllers.
+pub fn fps_controller_grounded(
+    mut commands: Commands,
+    mut query: Query<(Entity, &ShapeHits, &Rotation), With<FpsController>>,
+) {
+    for (entity, hits, rotation) in &mut query {
+        // The character is grounded if the shape caster has a hit with a normal
+        // that isn't too steep.
+        let is_grounded = hits
+            .iter()
+            .any(|hit| (rotation * -hit.normal2).angle_between(Vector::Y).abs() <= 0.5);
+
+        if is_grounded {
+            commands.entity(entity).insert(Grounded);
+        } else {
+            commands.entity(entity).remove::<Grounded>();
+        }
+    }
+}
+
 pub fn fps_controller_look(mut query: Query<(&mut FpsController, &FpsControllerInput)>) {
     for (mut controller, input) in query.iter_mut() {
         controller.pitch = input.pitch;
@@ -21,7 +41,7 @@ pub fn fps_controller_move(
         &mut LinearVelocity,
         &ShapeCaster,
         &ShapeHits,
-        Option<&Grounded>,
+        Has<Grounded>,
     )>,
 ) {
     let dt = time.delta_seconds();
@@ -62,7 +82,7 @@ pub fn fps_controller_move(
                 &mut transform,
                 &mut velocity,
                 shape_hits,
-                grounded.is_some(),
+                grounded,
             ),
         }
     }

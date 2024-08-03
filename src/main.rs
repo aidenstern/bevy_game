@@ -7,10 +7,7 @@ mod util;
 
 use std::f32::consts::TAU;
 
-use avian3d::{
-    math::{Quaternion, Vector},
-    prelude::*,
-};
+use avian3d::{math::Quaternion, prelude::*};
 use bevy::{prelude::*, render::camera::Exposure};
 use components::*;
 use leafwing_input_manager::prelude::*;
@@ -33,14 +30,7 @@ fn main() {
         .add_systems(Startup, setup)
         .add_systems(
             Update,
-            (
-                manage_cursor,
-                scene_colliders,
-                display_text,
-                respawn,
-                update_grounded,
-                check_grounded,
-            ),
+            (manage_cursor, scene_colliders, display_text, respawn),
         )
         .run();
 }
@@ -87,22 +77,13 @@ fn setup(mut commands: Commands, mut window: Query<&mut Window>, assets: Res<Ass
     let logical_entity = commands
         .spawn((
             logical_entity_collider.clone(),
-            Friction {
-                dynamic_coefficient: 0.0,
-                static_coefficient: 0.0,
-                combine_rule: CoefficientCombine::Min,
-            },
-            Restitution {
-                coefficient: 0.0,
-                combine_rule: CoefficientCombine::Min,
-            },
-            // ActiveEvents::COLLISION_EVENTS,
+            Friction::ZERO.with_combine_rule(CoefficientCombine::Min),
+            Restitution::ZERO.with_combine_rule(CoefficientCombine::Min),
             LinearVelocity::ZERO,
             RigidBody::Dynamic,
             LockedAxes::ROTATION_LOCKED,
             Mass(1.0),
             GravityScale(0.0),
-            // Ccd { enabled: true }, // Prevent clipping when going fast
             TransformBundle::from_transform(Transform::from_translation(SPAWN_POINT)),
             LogicalPlayer,
             FpsControllerInput {
@@ -134,6 +115,7 @@ fn setup(mut commands: Commands, mut window: Query<&mut Window>, assets: Res<Ass
         Dir3::NEG_Y,
     )
     .with_query_filter(filter)
+    .with_max_hits(10)
     .with_max_time_of_impact(6.0);
 
     commands.entity(logical_entity).insert(shape_caster);
@@ -180,28 +162,8 @@ fn respawn(mut query: Query<(&mut Transform, &mut LinearVelocity)>) {
     }
 }
 
-/// Updates the [`Grounded`] status for character controllers.
-fn update_grounded(
-    mut commands: Commands,
-    mut query: Query<(Entity, &ShapeHits, &Rotation), With<FpsController>>,
-) {
-    for (entity, hits, rotation) in &mut query {
-        // The character is grounded if the shape caster has a hit with a normal
-        // that isn't too steep.
-        let is_grounded = hits
-            .iter()
-            .any(|hit| (rotation * -hit.normal2).angle_between(Vector::Y).abs() <= 0.5);
-
-        if is_grounded {
-            commands.entity(entity).insert(Grounded);
-        } else {
-            commands.entity(entity).remove::<Grounded>();
-        }
-    }
-}
-
-fn check_grounded(mut query: Query<&LinearVelocity, With<Grounded>>) {
-    for velocity in &mut query {
-        println!("Grounded {:?}", velocity);
-    }
-}
+// fn check_grounded(mut query: Query<&LinearVelocity, With<Grounded>>) {
+//     for velocity in &mut query {
+//         println!("Grounded {:?}", velocity);
+//     }
+// }

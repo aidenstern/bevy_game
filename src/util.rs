@@ -1,5 +1,5 @@
 use crate::{FpsController, LogicalPlayer};
-use avian3d::{math::*, prelude::*};
+use avian3d::prelude::*;
 use bevy::{
     gltf::{Gltf, GltfMesh, GltfNode},
     prelude::*,
