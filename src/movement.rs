@@ -211,21 +211,20 @@ fn handle_ground_mode(
             controller.ground_tick = controller.ground_tick.saturating_add(1);
         }
 
-        // /* Crouching */
-        // let crouch_height = controller.crouch_height;
-        // let upright_height = controller.upright_height;
+        let crouch_height = controller.crouch_height;
+        let upright_height = controller.upright_height;
 
-        // let crouch_speed = if input.crouch {
-        //     -controller.crouch_speed
-        // } else {
-        //     controller.uncrouch_speed
-        // };
-        // controller.height += dt * crouch_speed;
-        // controller.height = controller.height.clamp(crouch_height, upright_height);
+        let crouch_speed = if input.crouch {
+            -controller.crouch_speed
+        } else {
+            controller.uncrouch_speed
+        };
+        controller.height += dt * crouch_speed;
+        controller.height = controller.height.clamp(crouch_height, upright_height);
 
-        // if let Some(capsule) = collider.into() {
-        //     capsule.set_shape(Collider::capsule(0.5, controller.height).shape().clone());
-        // }
+        if let Some(capsule) = collider.into() {
+            capsule.set_shape(Collider::capsule(0.5, controller.height).shape().clone());
+        }
 
         // Step offset
         // if controller.step_offset > f32::EPSILON && controller.ground_tick >= 1 {
