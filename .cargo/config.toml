@@ -33,5 +33,3 @@ rustflags = [
 [profile.dev]
 debug = 1
 
-[build]
-target = "aarch64-apple-darwin"

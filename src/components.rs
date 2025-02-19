@@ -1,4 +1,5 @@
-use bevy::{gltf::Gltf, prelude::*};
+use bevy_gltf::Gltf;
+use bevy::prelude::*;
 use leafwing_input_manager::prelude::*;
 
 /// A marker component indicating that an entity is on the ground.

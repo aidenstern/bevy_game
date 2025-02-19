@@ -1,7 +1,7 @@
 use crate::{FpsController, LogicalPlayer};
 use avian3d::prelude::*;
+use bevy_gltf::{Gltf, GltfMesh, GltfNode};
 use bevy::{
-    gltf::{Gltf, GltfMesh, GltfNode},
     prelude::*,
     window::CursorGrabMode,
 };

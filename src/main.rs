@@ -6,7 +6,7 @@ mod render;
 mod util;
 
 use std::f32::consts::TAU;
-
+use bevy_pbr::prelude::*;
 use avian3d::{math::Quaternion, prelude::*};
 use bevy::{prelude::*, render::camera::Exposure};
 use components::*;
