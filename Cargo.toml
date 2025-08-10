@@ -6,9 +6,16 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-bevy = { version = "0.14" }
 avian3d = { version = "0.1.1" }
 leafwing-input-manager = { version = "0.14" }
+
+# Platform-specific dependencies with dynamic linking for faster dev builds on Linux
+[target.'cfg(target_os = "linux")'.dependencies]
+bevy = { version = "0.14", features = ["dynamic_linking", "wayland"] }
+
+# Default bevy dependency for non-Linux platforms
+[target.'cfg(not(target_os = "linux"))'.dependencies]
+bevy = { version = "0.14" }
 
 # Enable a small amount of optimization in debug mode
 [profile.dev]
@@ -17,3 +24,4 @@ opt-level = 1
 # Enable high optimizations for dependencies (incl. Bevy), but not for our code:
 [profile.dev.package."*"]
 opt-level = 3
+
