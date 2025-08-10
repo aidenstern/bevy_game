@@ -9,22 +9,21 @@ pub fn fps_controller_input(
     action_state_query: Query<&ActionState<FpsActions>>,
     mut query: Query<(&FpsController, &mut FpsControllerInput)>,
 ) {
-    let (controller, mut input) = query.single_mut();
+    let Ok((controller, mut input)) = query.get_single_mut() else { return; };
 
     if !controller.enable_input {
         return;
     }
 
     for action_state in action_state_query.iter() {
-        if let Some(mouse_movement) = action_state.axis_pair(&FpsActions::MousePosition) {
-            let mouse_delta = mouse_movement.xy() * controller.sensitivity;
+        let mouse_movement = action_state.axis_pair(&FpsActions::MousePosition);
+        let mouse_delta = mouse_movement.xy() * controller.sensitivity;
 
-            input.pitch = (input.pitch - mouse_delta.y)
-                .clamp(-FRAC_PI_2 + ANGLE_EPSILON, FRAC_PI_2 - ANGLE_EPSILON);
-            input.yaw -= mouse_delta.x;
-            if input.yaw.abs() > PI {
-                input.yaw = input.yaw.rem_euclid(TAU);
-            }
+        input.pitch = (input.pitch - mouse_delta.y)
+            .clamp(-FRAC_PI_2 + ANGLE_EPSILON, FRAC_PI_2 - ANGLE_EPSILON);
+        input.yaw -= mouse_delta.x;
+        if input.yaw.abs() > PI {
+            input.yaw = input.yaw.rem_euclid(TAU);
         }
 
         input.movement = Vec3::new(

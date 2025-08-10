@@ -1,5 +1,5 @@
 use super::components::*;
-use avian3d::collision::Collider;
+use avian3d::prelude::Collider;
 use bevy::prelude::*;
 
 pub fn fps_controller_render(
