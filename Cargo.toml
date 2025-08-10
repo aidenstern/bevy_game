@@ -6,9 +6,9 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-bevy = { version = "0.14" }
-avian3d = { version = "0.1.1" }
-leafwing-input-manager = { version = "0.14" }
+bevy = { version = "0.16.1" }
+avian3d = { version = "0.3.1" }
+leafwing-input-manager = { version = "0.17.1" }
 
 # Enable a small amount of optimization in debug mode
 [profile.dev]
