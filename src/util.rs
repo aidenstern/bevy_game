@@ -71,7 +71,7 @@ pub fn display_text(
 ) {
     for (transform, velocity) in &mut controller_query {
         for mut text in &mut text_query {
-            text.sections[0].value = format!(
+            **text = format!(
                 "vel: {:.2}, {:.2}, {:.2}\npos: {:.2}, {:.2}, {:.2}\nspd: {:.2}",
                 velocity.x,
                 velocity.y,
@@ -101,7 +101,7 @@ pub fn scene_colliders(
 
     if let Some(gltf) = gltf {
         let scene = gltf.scenes.first().unwrap().clone();
-        commands.spawn(SceneBundle { scene, ..default() });
+        commands.spawn(SceneRoot(scene));
         for node in &gltf.nodes {
             let node = gltf_node_assets.get(node).unwrap();
             if let Some(gltf_mesh) = node.mesh.clone() {
@@ -111,7 +111,7 @@ pub fn scene_colliders(
                     commands.spawn((
                         Collider::trimesh_from_mesh(mesh).unwrap(),
                         RigidBody::Static,
-                        TransformBundle::from_transform(node.transform),
+                        node.transform,
                     ));
                 }
             }
@@ -126,17 +126,17 @@ pub fn manage_cursor(
     mut window_query: Query<&mut Window>,
     mut controller_query: Query<&mut FpsController>,
 ) {
-    let mut window = window_query.single_mut();
+    let Ok(mut window) = window_query.get_single_mut() else { return; };
     if btn.just_pressed(MouseButton::Left) {
-        window.cursor.grab_mode = CursorGrabMode::Locked;
-        window.cursor.visible = false;
+        window.cursor_options.grab_mode = CursorGrabMode::Locked;
+        window.cursor_options.visible = false;
         for mut controller in &mut controller_query {
             controller.enable_input = true;
         }
     }
     if key.just_pressed(KeyCode::Escape) {
-        window.cursor.grab_mode = CursorGrabMode::None;
-        window.cursor.visible = true;
+        window.cursor_options.grab_mode = CursorGrabMode::None;
+        window.cursor_options.visible = true;
         for mut controller in &mut controller_query {
             controller.enable_input = false;
         }

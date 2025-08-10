@@ -5,7 +5,6 @@ use super::movement::*;
 use super::render::*;
 
 use bevy::prelude::*;
-use leafwing_input_manager::systems::run_if_enabled;
 
 pub struct FpsControllerPlugin;
 
@@ -20,8 +19,7 @@ impl Plugin for FpsControllerPlugin {
                 fps_controller_look,
                 fps_controller_render,
             )
-                .chain()
-                .run_if(run_if_enabled::<FpsActions>),
+                .chain(),
         );
     }
 }

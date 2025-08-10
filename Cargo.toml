@@ -10,6 +10,10 @@ bevy = { version = "0.16.1" }
 avian3d = { version = "0.3.1" }
 leafwing-input-manager = { version = "0.17.1" }
 
+# Platform-specific features for dynamic linking on Linux
+[target.'cfg(target_os = "linux")'.dependencies]
+bevy = { version = "0.16.1", features = ["dynamic_linking", "wayland"] }
+
 # Enable a small amount of optimization in debug mode
 [profile.dev]
 opt-level = 1
@@ -17,3 +21,4 @@ opt-level = 1
 # Enable high optimizations for dependencies (incl. Bevy), but not for our code:
 [profile.dev.package."*"]
 opt-level = 3
+

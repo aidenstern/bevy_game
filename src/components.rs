@@ -14,6 +14,7 @@ pub struct MainScene {
 
 #[derive(Actionlike, Clone, Debug, Copy, PartialEq, Eq, Hash, Reflect)]
 pub enum FpsActions {
+    #[actionlike(DualAxis)]
     MousePosition,
     Forward,
     Backward,

@@ -21,6 +21,7 @@ fn main() {
         .insert_resource(AmbientLight {
             color: Color::WHITE,
             brightness: 10000.0,
+            affects_lightmapped_meshes: false,
         })
         .insert_resource(ClearColor(Color::Srgba(Srgba::hex("D4F5F5").unwrap())))
         .add_plugins(PhysicsPlugins::default())
@@ -36,7 +37,7 @@ fn main() {
 }
 
 fn setup(mut commands: Commands, mut window: Query<&mut Window>, assets: Res<AssetServer>) {
-    let mut window = window.single_mut();
+    let Ok(mut window) = window.get_single_mut() else { return; };
     window.title = String::from("Game");
 
     commands.insert_resource(MainScene {
@@ -44,30 +45,29 @@ fn setup(mut commands: Commands, mut window: Query<&mut Window>, assets: Res<Ass
         is_loaded: false,
     });
 
-    commands.spawn(DirectionalLightBundle {
-        directional_light: DirectionalLight {
+    commands.spawn((
+        DirectionalLight {
             illuminance: light_consts::lux::FULL_DAYLIGHT,
             shadows_enabled: true,
             ..default()
         },
-        transform: Transform::from_xyz(4.0, 7.0, 5.0).looking_at(Vec3::ZERO, Vec3::Y),
-        ..default()
-    });
+        Transform::from_xyz(4.0, 7.0, 5.0).looking_at(Vec3::ZERO, Vec3::Y),
+    ));
 
     // Rust analyzer complains if I put the mouse motion with the key bindings in one array in the constructor
     // So I'm doing it in two steps
-    let input_map = InputMap::new([(FpsActions::MousePosition, DualAxis::mouse_motion())])
-        .insert_multiple([
-            (FpsActions::Forward, KeyCode::KeyW),
-            (FpsActions::Backward, KeyCode::KeyS),
-            (FpsActions::Left, KeyCode::KeyA),
-            (FpsActions::Right, KeyCode::KeyD),
-            (FpsActions::Sprint, KeyCode::ShiftLeft),
-            (FpsActions::Crouch, KeyCode::ControlLeft),
-            (FpsActions::Jump, KeyCode::Space),
-            (FpsActions::Fly, KeyCode::AltLeft),
-        ])
-        .build();
+    let mut input_map = InputMap::default();
+    input_map.insert_dual_axis(FpsActions::MousePosition, MouseMove::default());
+    input_map.insert_multiple([
+        (FpsActions::Forward, KeyCode::KeyW),
+        (FpsActions::Backward, KeyCode::KeyS),
+        (FpsActions::Left, KeyCode::KeyA),
+        (FpsActions::Right, KeyCode::KeyD),
+        (FpsActions::Sprint, KeyCode::ShiftLeft),
+        (FpsActions::Crouch, KeyCode::ControlLeft),
+        (FpsActions::Jump, KeyCode::Space),
+        (FpsActions::Fly, KeyCode::AltLeft),
+    ]);
 
     let logical_entity_collider = Collider::capsule(1.0, 0.5);
 
@@ -84,7 +84,7 @@ fn setup(mut commands: Commands, mut window: Query<&mut Window>, assets: Res<Ass
             LockedAxes::ROTATION_LOCKED,
             Mass(1.0),
             GravityScale(0.0),
-            TransformBundle::from_transform(Transform::from_translation(SPAWN_POINT)),
+            Transform::from_translation(SPAWN_POINT),
             LogicalPlayer,
             FpsControllerInput {
                 pitch: -TAU / 12.0,
@@ -100,7 +100,7 @@ fn setup(mut commands: Commands, mut window: Query<&mut Window>, assets: Res<Ass
             height_offset: 0.0,
             radius_scale: 0.75,
         })
-        .insert(InputManagerBundle::with_map(input_map))
+        .insert(input_map)
         .id();
 
     // Capsule cast downwards to find ground
@@ -116,38 +116,36 @@ fn setup(mut commands: Commands, mut window: Query<&mut Window>, assets: Res<Ass
     )
     .with_query_filter(filter)
     .with_max_hits(10)
-    .with_max_time_of_impact(6.0);
+    .with_max_distance(6.0);
 
     commands.entity(logical_entity).insert(shape_caster);
 
     commands.spawn((
-        Camera3dBundle {
-            projection: Projection::Perspective(PerspectiveProjection {
-                fov: TAU / 5.0,
-                ..default()
-            }),
-            exposure: Exposure::SUNLIGHT,
+        Camera3d::default(),
+        Projection::Perspective(PerspectiveProjection {
+            fov: TAU / 5.0,
             ..default()
-        },
+        }),
+        Transform::default(),
+        Exposure::SUNLIGHT,
         RenderPlayer { logical_entity },
     ));
 
-    commands.spawn(
-        TextBundle::from_section(
-            "",
-            TextStyle {
-                font: assets.load("fira_mono.ttf"),
-                font_size: 24.0,
-                color: Color::BLACK,
-            },
-        )
-        .with_style(Style {
+    commands.spawn((
+        Text::new(""),
+        TextFont {
+            font: assets.load("fira_mono.ttf"),
+            font_size: 24.0,
+            ..default()
+        },
+        TextColor(Color::BLACK),
+        Node {
             position_type: PositionType::Absolute,
             top: Val::Px(5.0),
             left: Val::Px(5.0),
             ..default()
-        }),
-    );
+        },
+    ));
 }
 
 fn respawn(mut query: Query<(&mut Transform, &mut LinearVelocity)>) {

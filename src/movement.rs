@@ -44,7 +44,7 @@ pub fn fps_controller_move(
         Has<Grounded>,
     )>,
 ) {
-    let dt = time.delta_seconds();
+    let dt = time.delta_secs();
 
     for (
         entity,
@@ -179,7 +179,7 @@ fn handle_ground_mode(
                     *velocity = LinearVelocity::ZERO;
                 }
                 if controller.ground_tick == 1 {
-                    velocity.y = -shape_hit_data.time_of_impact;
+                    velocity.y = -shape_hit_data.distance;
                 }
                 // println!("Ground velocity: {:?}", velocity.0);
             }
