@@ -126,7 +126,9 @@ pub fn manage_cursor(
     mut window_query: Query<&mut Window>,
     mut controller_query: Query<&mut FpsController>,
 ) {
-    let Ok(mut window) = window_query.get_single_mut() else { return; };
+    let Ok(mut window) = window_query.single_mut() else {
+        return;
+    };
     if btn.just_pressed(MouseButton::Left) {
         window.cursor_options.grab_mode = CursorGrabMode::Locked;
         window.cursor_options.visible = false;
