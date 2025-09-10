@@ -4,17 +4,21 @@ use avian3d::{math::*, prelude::*};
 use bevy::prelude::*;
 
 // Type alias to reduce complexity
-type FpsControllerQuery<'w, 's> = Query<'w, 's, (
-    Entity,
-    &'static FpsControllerInput,
-    &'static mut FpsController,
-    &'static mut Collider,
-    &'static mut Transform,
-    &'static mut LinearVelocity,
-    &'static ShapeCaster,
-    &'static ShapeHits,
-    Has<Grounded>,
-)>;
+type FpsControllerQuery<'w, 's> = Query<
+    'w,
+    's,
+    (
+        Entity,
+        &'static FpsControllerInput,
+        &'static mut FpsController,
+        &'static mut Collider,
+        &'static mut Transform,
+        &'static mut LinearVelocity,
+        &'static ShapeCaster,
+        &'static ShapeHits,
+        Has<Grounded>,
+    ),
+>;
 
 // Struct to group ground mode parameters
 struct GroundModeParams<'a> {
@@ -56,10 +60,7 @@ pub fn fps_controller_look(mut query: Query<(&mut FpsController, &FpsControllerI
     }
 }
 
-pub fn fps_controller_move(
-    time: Res<Time>,
-    mut query: FpsControllerQuery,
-) {
+pub fn fps_controller_move(time: Res<Time>, mut query: FpsControllerQuery) {
     let dt = time.delta_secs();
 
     for (

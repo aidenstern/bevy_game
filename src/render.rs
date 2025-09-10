@@ -3,12 +3,17 @@ use avian3d::prelude::Collider;
 use bevy::prelude::*;
 
 // Type alias to reduce complexity
-type LogicalPlayerQuery<'w, 's> = Query<'w, 's, (
-    &'static Transform,
-    &'static Collider,
-    &'static FpsController,
-    &'static CameraConfig,
-), (With<LogicalPlayer>, Without<RenderPlayer>)>;
+type LogicalPlayerQuery<'w, 's> = Query<
+    'w,
+    's,
+    (
+        &'static Transform,
+        &'static Collider,
+        &'static FpsController,
+        &'static CameraConfig,
+    ),
+    (With<LogicalPlayer>, Without<RenderPlayer>),
+>;
 
 pub fn fps_controller_render(
     mut render_query: Query<(&mut Transform, &RenderPlayer), With<RenderPlayer>>,
