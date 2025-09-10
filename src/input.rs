@@ -9,7 +9,9 @@ pub fn fps_controller_input(
     action_state_query: Query<&ActionState<FpsActions>>,
     mut query: Query<(&FpsController, &mut FpsControllerInput)>,
 ) {
-    let Ok((controller, mut input)) = query.get_single_mut() else { return; };
+    let Ok((controller, mut input)) = query.get_single_mut() else {
+        return;
+    };
 
     if !controller.enable_input {
         return;
