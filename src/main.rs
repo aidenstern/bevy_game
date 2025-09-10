@@ -37,7 +37,7 @@ fn main() {
 }
 
 fn setup(mut commands: Commands, mut window: Query<&mut Window>, assets: Res<AssetServer>) {
-    let Ok(mut window) = window.get_single_mut() else {
+    let Ok(mut window) = window.single_mut() else {
         return;
     };
     window.title = String::from("Game");

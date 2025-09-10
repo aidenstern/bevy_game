@@ -9,7 +9,7 @@ pub fn fps_controller_input(
     action_state_query: Query<&ActionState<FpsActions>>,
     mut query: Query<(&FpsController, &mut FpsControllerInput)>,
 ) {
-    let Ok((controller, mut input)) = query.get_single_mut() else {
+    let Ok((controller, mut input)) = query.single_mut() else {
         return;
     };
 
@@ -29,9 +29,9 @@ pub fn fps_controller_input(
         }
 
         input.movement = Vec3::new(
-            get_axis(&action_state, FpsActions::Right, FpsActions::Left),
-            get_axis(&action_state, FpsActions::Jump, FpsActions::Sprint),
-            get_axis(&action_state, FpsActions::Forward, FpsActions::Backward),
+            get_axis(action_state, FpsActions::Right, FpsActions::Left),
+            get_axis(action_state, FpsActions::Jump, FpsActions::Sprint),
+            get_axis(action_state, FpsActions::Forward, FpsActions::Backward),
         );
 
         input.fly = action_state.just_pressed(&FpsActions::Fly);

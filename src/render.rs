@@ -2,12 +2,17 @@ use super::components::*;
 use avian3d::prelude::Collider;
 use bevy::prelude::*;
 
+// Type alias to reduce complexity
+type LogicalPlayerQuery<'w, 's> = Query<'w, 's, (
+    &'static Transform,
+    &'static Collider,
+    &'static FpsController,
+    &'static CameraConfig,
+), (With<LogicalPlayer>, Without<RenderPlayer>)>;
+
 pub fn fps_controller_render(
     mut render_query: Query<(&mut Transform, &RenderPlayer), With<RenderPlayer>>,
-    logical_query: Query<
-        (&Transform, &Collider, &FpsController, &CameraConfig),
-        (With<LogicalPlayer>, Without<RenderPlayer>),
-    >,
+    logical_query: LogicalPlayerQuery,
 ) {
     for (mut render_transform, render_player) in render_query.iter_mut() {
         if let Ok((logical_transform, _collider, controller, camera_config)) =

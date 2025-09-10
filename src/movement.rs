@@ -3,6 +3,32 @@ use super::util::acceleration;
 use avian3d::{math::*, prelude::*};
 use bevy::prelude::*;
 
+// Type alias to reduce complexity
+type FpsControllerQuery<'w, 's> = Query<'w, 's, (
+    Entity,
+    &'static FpsControllerInput,
+    &'static mut FpsController,
+    &'static mut Collider,
+    &'static mut Transform,
+    &'static mut LinearVelocity,
+    &'static ShapeCaster,
+    &'static ShapeHits,
+    Has<Grounded>,
+)>;
+
+// Struct to group ground mode parameters
+struct GroundModeParams<'a> {
+    entity: Entity,
+    dt: f32,
+    input: &'a FpsControllerInput,
+    controller: &'a mut FpsController,
+    collider: &'a mut Collider,
+    transform: &'a mut Transform,
+    velocity: &'a mut LinearVelocity,
+    shape_hits: &'a ShapeHits,
+    grounded: bool,
+}
+
 /// Updates the [`Grounded`] status for character controllers.
 pub fn fps_controller_grounded(
     mut commands: Commands,
@@ -32,17 +58,7 @@ pub fn fps_controller_look(mut query: Query<(&mut FpsController, &FpsControllerI
 
 pub fn fps_controller_move(
     time: Res<Time>,
-    mut query: Query<(
-        Entity,
-        &FpsControllerInput,
-        &mut FpsController,
-        &mut Collider,
-        &mut Transform,
-        &mut LinearVelocity,
-        &ShapeCaster,
-        &ShapeHits,
-        Has<Grounded>,
-    )>,
+    mut query: FpsControllerQuery,
 ) {
     let dt = time.delta_secs();
 
@@ -72,18 +88,21 @@ pub fn fps_controller_move(
         });
 
         match controller.move_mode {
-            MoveMode::Noclip => handle_noclip_mode(&input, &mut controller, &mut velocity),
-            MoveMode::Ground => handle_ground_mode(
-                entity,
-                dt,
-                &input,
-                &mut controller,
-                &mut collider,
-                &mut transform,
-                &mut velocity,
-                shape_hits,
-                grounded,
-            ),
+            MoveMode::Noclip => handle_noclip_mode(input, &mut controller, &mut velocity),
+            MoveMode::Ground => {
+                let params = GroundModeParams {
+                    entity,
+                    dt,
+                    input,
+                    controller: &mut controller,
+                    collider: &mut collider,
+                    transform: &mut transform,
+                    velocity: &mut velocity,
+                    shape_hits,
+                    grounded,
+                };
+                handle_ground_mode(params)
+            }
         }
     }
 }
@@ -108,18 +127,19 @@ fn handle_noclip_mode(
     }
 }
 
-fn handle_ground_mode(
-    entity: Entity,
-    dt: f32,
-    input: &FpsControllerInput,
-    controller: &mut FpsController,
-    collider: &mut Collider,
-    transform: &mut Transform,
-    velocity: &mut LinearVelocity,
-    shape_hits: &ShapeHits,
-    grounded: bool,
-) {
-    if let Some(capsule) = collider.shape_scaled().as_capsule() {
+fn handle_ground_mode(params: GroundModeParams) {
+    let GroundModeParams {
+        entity: _entity,
+        dt,
+        input,
+        controller,
+        collider,
+        transform: _transform,
+        velocity,
+        shape_hits,
+        grounded,
+    } = params;
+    if let Some(_capsule) = collider.shape_scaled().as_capsule() {
         let speeds = Vec3::new(controller.side_speed, 0.0, controller.forward_speed);
         let mut move_to_world = Mat3::from_axis_angle(Vec3::Y, input.yaw);
         move_to_world.z_axis *= -1.0; // Forward is -Z

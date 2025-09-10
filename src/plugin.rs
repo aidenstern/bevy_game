@@ -1,5 +1,3 @@
-use crate::components::FpsActions;
-
 use super::input::*;
 use super::movement::*;
 use super::render::*;

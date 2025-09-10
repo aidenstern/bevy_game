@@ -43,6 +43,7 @@ pub struct RenderPlayer {
 #[derive(Component)]
 pub struct CameraConfig {
     pub height_offset: f32,
+    #[allow(dead_code)]
     pub radius_scale: f32,
 }
 
@@ -60,6 +61,7 @@ pub struct FpsControllerInput {
 #[derive(Component)]
 pub struct FpsController {
     pub move_mode: MoveMode,
+    #[allow(dead_code)]
     pub radius: f32,
     pub gravity: f32,
     pub walk_speed: f32,
@@ -82,6 +84,7 @@ pub struct FpsController {
     pub upright_height: f32,
     pub crouch_height: f32,
     pub fast_fly_speed: f32,
+    #[allow(dead_code)]
     pub fly_friction: f32,
     pub pitch: f32,
     pub yaw: f32,
@@ -89,6 +92,7 @@ pub struct FpsController {
     pub stop_speed: f32,
     pub sensitivity: f32,
     pub enable_input: bool,
+    #[allow(dead_code)]
     pub step_offset: f32,
 }
 
