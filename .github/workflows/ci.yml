@@ -56,7 +56,7 @@ jobs:
           override: true
       
       - name: Cache cargo registry
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: |
             ~/.cargo/registry
@@ -73,7 +73,7 @@ jobs:
         run: cargo test --release
       
       - name: Upload Windows artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: windows-build
           path: target/release/bevy_game.exe
@@ -107,7 +107,7 @@ jobs:
             libglu1-mesa-dev
       
       - name: Cache cargo registry
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: |
             ~/.cargo/registry
@@ -124,7 +124,7 @@ jobs:
         run: cargo test --release
       
       - name: Upload Linux artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: linux-build
           path: target/release/bevy_game
@@ -155,7 +155,7 @@ jobs:
           sudo mv trunk /usr/local/bin/
       
       - name: Cache cargo registry
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: |
             ~/.cargo/registry
@@ -176,7 +176,7 @@ jobs:
           cp target/wasm32-unknown-unknown/release/bevy_game.wasm wasm-dist/
       
       - name: Upload WASM artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: wasm-build
           path: wasm-dist/
